@@ -240,31 +240,39 @@ public class ProfileFragment extends Fragment implements ApprovalAdapter.OnAppro
     }
     
     private void loadUserProfile() {
-        if (currentUser != null) {
-            db.collection("users").document(currentUser.getUid())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        userProfile = documentSnapshot.toObject(User.class);
-                        
-                        if (userProfile != null) {
-                            tvFullName.setText(userProfile.getFullName());
-                            tvDesignation.setText(userProfile.getDesignation());
-                            tvEmail.setText(userProfile.getEmail());
-                            
-                            if (userProfile.getProfileImageUrl() != null && !userProfile.getProfileImageUrl().isEmpty()) {
-                                Glide.with(this)
-                                    .load(userProfile.getProfileImageUrl())
-                                    .placeholder(R.drawable.ic_profile)
-                                    .into(ivProfileImage);
-                            }
-                            
-                            // Load stats
-                            loadUserStats();
-                        }
-                    }
-                });
+        if (currentUser == null) {
+            return;
         }
+        
+        // Add this debug toast to show UID
+        Toast.makeText(getContext(), "Current user UID: " + currentUser.getUid(), Toast.LENGTH_LONG).show();
+        
+        db.collection("users").document(currentUser.getUid())
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    userProfile = documentSnapshot.toObject(User.class);
+                    
+                    if (userProfile != null) {
+                        // Add this debug toast to show designation
+                        Toast.makeText(getContext(), "User designation: " + userProfile.getDesignation(), Toast.LENGTH_LONG).show();
+                        
+                        tvFullName.setText(userProfile.getFullName());
+                        tvDesignation.setText(userProfile.getDesignation());
+                        tvEmail.setText(userProfile.getEmail());
+                        
+                        if (userProfile.getProfileImageUrl() != null && !userProfile.getProfileImageUrl().isEmpty()) {
+                            Glide.with(this)
+                                .load(userProfile.getProfileImageUrl())
+                                .placeholder(R.drawable.ic_profile)
+                                .into(ivProfileImage);
+                        }
+                        
+                        // Load stats
+                        loadUserStats();
+                    }
+                }
+            });
     }
     
     private void loadUserStats() {

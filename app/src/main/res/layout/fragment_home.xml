@@ -141,17 +141,6 @@
                 android:visibility="gone"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Quick Actions Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/quick_actions"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <include layout="@layout/layout_quick_actions" />
-
             <!-- Event Highlights Section -->
             <LinearLayout
                 android:layout_width="match_parent"

@@ -1,0 +1,79 @@
+{
+  "rooms": [
+    {
+      "id": "room1",
+      "name": "Room 101",
+      "type": "Classroom",
+      "capacity": 60,
+      "building": "A",
+      "floor": "1",
+      "isAvailable": true,
+      "description": "Standard classroom with projector and whiteboard",
+      "currentBookings": [],
+      "location": "Main Building",
+      "buildingName": "Academic Block A",
+      "latitude": 12.9716,
+      "longitude": 77.5946
+    },
+    {
+      "id": "room2",
+      "name": "Room 102",
+      "type": "Classroom",
+      "capacity": 80,
+      "building": "A",
+      "floor": "1",
+      "isAvailable": true,
+      "description": "Large classroom with smart board",
+      "currentBookings": [],
+      "location": "Main Building",
+      "buildingName": "Academic Block A",
+      "latitude": 12.9716,
+      "longitude": 77.5946
+    },
+    {
+      "id": "room3",
+      "name": "Lab 201",
+      "type": "Laboratory",
+      "capacity": 40,
+      "building": "B",
+      "floor": "2",
+      "isAvailable": true,
+      "description": "Computer lab with 40 workstations",
+      "currentBookings": [],
+      "location": "Science Building",
+      "buildingName": "Academic Block B",
+      "latitude": 12.9717,
+      "longitude": 77.5947
+    },
+    {
+      "id": "room4",
+      "name": "Conference Room 1",
+      "type": "Conference Room",
+      "capacity": 20,
+      "building": "C",
+      "floor": "1",
+      "isAvailable": true,
+      "description": "Meeting room with video conferencing",
+      "currentBookings": [],
+      "location": "Admin Building",
+      "buildingName": "Administrative Block",
+      "latitude": 12.9718,
+      "longitude": 77.5948
+    },
+    {
+      "id": "room5",
+      "name": "Auditorium",
+      "type": "Auditorium",
+      "capacity": 200,
+      "building": "D",
+      "floor": "G",
+      "isAvailable": true,
+      "description": "Main auditorium with stage and AV system",
+      "currentBookings": [],
+      "location": "Main Building",
+      "buildingName": "Event Center",
+      "latitude": 12.9719,
+      "longitude": 77.5949
+    }
+  ]
+} 

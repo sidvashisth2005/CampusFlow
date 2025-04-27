@@ -20,6 +20,8 @@ import com.google.android.material.navigation.NavigationBarView;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sid.campusflow.utils.DataSeeder;
+
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
     private ViewPager2 viewPager;
@@ -33,6 +35,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         // Initialize views
         viewPager = findViewById(R.id.view_pager);
         bottomNavigation = findViewById(R.id.bottom_navigation);
+
+        // Initialize data seeder
+        DataSeeder dataSeeder = new DataSeeder(this);
+        dataSeeder.seedRoomsIfNeeded();
 
         // Setup ViewPager
         setupViewPager();

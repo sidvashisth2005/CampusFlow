@@ -1,273 +1,178 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Enhanced helper functions
+    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
-
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
+    
     function isAdmin() {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.designation == "admin";
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.designation == 'Admin';
     }
-
+    
     function isFaculty() {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.designation == "Faculty" || 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.designation == "admin");
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.designation == 'Faculty';
     }
-
+    
+    function isSecretary() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.designation == 'Secretary';
+    }
+    
     function isStudent() {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.designation == "Student";
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.designation == 'Student';
+    }
+    
+    function isFacultyOrSecretary() {
+      return isFaculty() || isSecretary();
+    }
+    
+    function isAdminOrFaculty() {
+      return isAdmin() || isFaculty();
+    }
+    
+    function isAdminOrSecretary() {
+      return isAdmin() || isSecretary();
+    }
+    
+    function isValidDate(date) {
+      return date is timestamp && date > timestamp.date(2024, 1, 1);
+    }
+    
+    function isValidBookingTime(startTime, endTime) {
+      return isValidDate(startTime) && 
+             isValidDate(endTime) && 
+             startTime < endTime;
     }
 
-    function isInDepartment(departmentId) {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.department == departmentId;
-    }
-
-    function isValidStatus(status) {
-      return status == "PENDING" || status == "APPROVED" || status == "REJECTED";
-    }
-
-    // Users collection
+    // Users collection rules
     match /users/{userId} {
-      // Anyone authenticated can read basic user profiles
       allow read: if isAuthenticated();
-      // Users can only update their own profile
-      allow update: if isAuthenticated() && isOwner(userId);
-      // Users can create their own profile during registration
-      allow create: if isAuthenticated() && isOwner(userId);
-      // Only admins can delete user profiles
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && request.auth.uid == userId;
       allow delete: if isAdmin();
     }
 
-    // Events collection
-    match /events/{eventId} {
-      // Anyone authenticated can read events
+    // Rooms collection rules
+    match /rooms/{roomId} {
       allow read: if isAuthenticated();
-      // Faculty and admins can create events
-      allow create: if isFaculty();
-      // Only creator or admins can update/delete events
-      allow update, delete: if isAuthenticated() && (
-        resource.data.createdBy == request.auth.uid || isAdmin()
-      );
-
-      // Attendees sub-collection
-      match /attendees/{attendeeId} {
-        // Anyone authenticated can read attendee lists
-        allow read: if isAuthenticated();
-        // Users can register themselves or admins can register anyone
-        allow create, update: if isAuthenticated() && (
-          isOwner(attendeeId) || isAdmin()
-        );
-        // Users can remove themselves or event creator/admin can remove anyone
-        allow delete: if isAuthenticated() && (
-          isOwner(attendeeId) || 
-          get(/databases/$(database)/documents/events/$(eventId)).data.createdBy == request.auth.uid || 
-          isAdmin()
-        );
-      }
-
-      // Comments sub-collection
-      match /comments/{commentId} {
-        // Anyone authenticated can read comments
-        allow read: if isAuthenticated();
-        // Anyone authenticated can create comments
-        allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-        // Only comment author can update their comment
-        allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-        // Comment author, event creator, or admin can delete comments
-        allow delete: if isAuthenticated() && (
-          resource.data.userId == request.auth.uid || 
-          get(/databases/$(database)/documents/events/$(eventId)).data.createdBy == request.auth.uid || 
-          isAdmin()
-        );
-      }
-    }
-
-    // Notices collection
-    match /notices/{noticeId} {
-      // Anyone authenticated can read notices
-      allow read: if isAuthenticated();
-      // Faculty and admins can create notices
-      allow create: if isFaculty();
-      // Only creator or admins can update/delete notices
-      allow update, delete: if isAuthenticated() && (
-        resource.data.createdBy == request.auth.uid || isAdmin()
-      );
-    }
-
-    // Approvals collection
-    match /approvals/{approvalId} {
-      // Users can read their own approvals, faculty/admins can read all approvals
-      allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || isFaculty()
-      );
-      // Users can create approval requests for themselves with PENDING status
-      allow create: if isAuthenticated() && 
-        request.resource.data.userId == request.auth.uid && 
-        request.resource.data.status == "PENDING" &&
-        isValidStatus(request.resource.data.status);
-      // Faculty can update approvals but must maintain the same userId
-      // Admins can update any approval
-      allow update: if isAuthenticated() && 
-        isValidStatus(request.resource.data.status) &&
-        ((isFaculty() && request.resource.data.userId == resource.data.userId) || isAdmin());
-      // Only admins can delete approvals
-      allow delete: if isAdmin();
-    }
-
-    // Timetables collection
-    match /timetables/{timetableId} {
-      // Anyone authenticated can read timetables
-      allow read: if isAuthenticated();
-      // Only faculty and admins can create timetables
-      allow create: if isFaculty();
-      // Only creator or admins can update/delete timetables
-      allow update, delete: if isAuthenticated() && (
-        resource.data.createdBy == request.auth.uid || isAdmin()
-      );
-    }
-
-    // Maps collection
-    match /maps/{mapId} {
-      // Anyone authenticated can read maps
-      allow read: if isAuthenticated();
-      // Only admins can create, update, or delete maps
-      allow create, update, delete: if isAdmin();
-    }
-
-    // Bookings collection
-    match /bookings/{bookingId} {
-      // Users can read their own bookings, faculty/admins can read all bookings
-      allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || isFaculty()
-      );
-      // Users can create bookings for themselves
-      allow create: if isAuthenticated() && 
-        request.resource.data.userId == request.auth.uid;
-      // Users can only update their own bookings if not yet approved
-      // Faculty/admins can update any booking
-      allow update: if isAuthenticated() && (
-        (resource.data.userId == request.auth.uid && resource.data.status == "PENDING") || 
-        isFaculty()
-      );
-      // Users can only delete their own pending bookings
-      // Admins can delete any booking
-      allow delete: if isAuthenticated() && (
-        (resource.data.userId == request.auth.uid && resource.data.status == "PENDING") || 
-        isAdmin()
-      );
-    }
-
-    // Communities collection
-    match /communities/{communityId} {
-      // Anyone authenticated can read communities
-      allow read: if isAuthenticated();
-      // Faculty and admins can create communities
-      allow create: if isFaculty();
-      // Only creator or admins can update communities
-      allow update: if isAuthenticated() && (
-        resource.data.createdBy == request.auth.uid || isAdmin()
-      );
-      // Only admins can delete communities
-      allow delete: if isAdmin();
-
-      // Posts sub-collection
-      match /posts/{postId} {
-        // Anyone in the community can read posts
-        allow read: if isAuthenticated();
-        // Anyone in the community can create posts
-        allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-        // Only post author can update their post
-        allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-        // Post author, community creator, or admin can delete posts
-        allow delete: if isAuthenticated() && (
-          resource.data.userId == request.auth.uid || 
-          get(/databases/$(database)/documents/communities/$(communityId)).data.createdBy == request.auth.uid || 
-          isAdmin()
-        );
-      }
-    }
-
-    // User-community mappings
-    match /userCommunities/{mappingId} {
-      // Users can read their own mappings, community creators/admins can read all
-      allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || 
-        get(/databases/$(database)/documents/communities/$(resource.data.communityId)).data.createdBy == request.auth.uid || 
-        isAdmin()
-      );
-      // Users can join communities (create mapping for themselves)
-      allow create: if isAuthenticated() && 
-        request.resource.data.userId == request.auth.uid;
-      // Users can leave communities (delete their own mapping)
-      // Community creator or admin can remove users
-      allow delete: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || 
-        get(/databases/$(database)/documents/communities/$(resource.data.communityId)).data.createdBy == request.auth.uid || 
-        isAdmin()
-      );
-    }
-
-    // Courses collection
-    match /courses/{courseId} {
-      // Anyone authenticated can read courses
-      allow read: if isAuthenticated();
-      // Only faculty can create courses
-      allow create: if isFaculty();
-      // Only course instructor or admin can update courses
-      allow update: if isAuthenticated() && (
-        resource.data.instructorId == request.auth.uid || isAdmin()
-      );
-      // Only admins can delete courses
-      allow delete: if isAdmin();
-
-      // Materials sub-collection
-      match /materials/{materialId} {
-        // Anyone enrolled in course can read materials
-        allow read: if isAuthenticated();
-        // Only course instructor or admin can add/update/delete materials
-        allow write: if isAuthenticated() && (
-          get(/databases/$(database)/documents/courses/$(courseId)).data.instructorId == request.auth.uid || 
-          isAdmin()
-        );
-      }
-    }
-
-    // Announcements collection
-    match /announcements/{announcementId} {
-      // Anyone authenticated can read announcements
-      allow read: if isAuthenticated();
-      // Only faculty and admins can create announcements
-      allow create: if isFaculty();
-      // Only creator or admins can update/delete announcements
-      allow update, delete: if isAuthenticated() && (
-        resource.data.createdBy == request.auth.uid || isAdmin()
-      );
-    }
-
-    // Departments collection
-    match /departments/{departmentId} {
-      // Anyone authenticated can read departments
-      allow read: if isAuthenticated();
-      // Only admins can create, update, delete departments
       allow write: if isAdmin();
+      
+      // Validate room data
+      allow create: if isAdmin() && 
+        request.resource.data.type is string &&
+        request.resource.data.capacity is number &&
+        request.resource.data.location is string &&
+        request.resource.data.buildingName is string &&
+        request.resource.data.latitude is number &&
+        request.resource.data.longitude is number;
     }
 
-    // Default rule - deny everything else
-    match /{document=**} {
-      allow read, write: if false;
+    // Bookings collection rules
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+      
+      // Validate booking data
+      allow create: if isAdmin() && 
+        request.resource.data.roomId is string &&
+        request.resource.data.requesterId is string &&
+        request.resource.data.requesterName is string &&
+        request.resource.data.requesterDesignation is string &&
+        isValidBookingTime(request.resource.data.startTime, request.resource.data.endTime);
+    }
+
+    // BookingRequests collection rules
+    match /bookingRequests/{requestId} {
+      allow read: if isAuthenticated();
+      allow create: if isFacultyOrSecretary();
+      allow update: if isAdmin();
+      allow delete: if isAdmin() || 
+        (isAuthenticated() && resource.data.requesterId == request.auth.uid);
+      
+      // Validate booking request data
+      allow create: if isFacultyOrSecretary() && 
+        request.resource.data.roomId is string &&
+        request.resource.data.requesterId is string &&
+        request.resource.data.requesterName is string &&
+        request.resource.data.requesterDesignation is string &&
+        isValidBookingTime(request.resource.data.startTime, request.resource.data.endTime) &&
+        request.resource.data.status == 'PENDING';
+    }
+
+    // Events collection rules
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdminOrFaculty();
+      allow update: if isAdminOrFaculty();
+      allow delete: if isAdmin();
+      
+      // Validate event data
+      allow create: if isAdminOrFaculty() && 
+        request.resource.data.title is string &&
+        request.resource.data.description is string &&
+        request.resource.data.organizerId is string &&
+        isValidDate(request.resource.data.date);
+    }
+
+    // TimeTables collection rules
+    match /timeTables/{timeTableId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdminOrSecretary();
+      allow update: if isAdminOrSecretary();
+      allow delete: if isAdmin();
+      
+      // Validate timetable data
+      allow create: if isAdminOrSecretary() && 
+        request.resource.data.semester is string &&
+        request.resource.data.department is string &&
+        request.resource.data.fileUrl is string;
+    }
+
+    // Maps collection rules
+    match /maps/{mapId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+      
+      // Validate map data
+      allow create: if isAdmin() && 
+        request.resource.data.name is string &&
+        request.resource.data.fileUrl is string;
+    }
+
+    // Glimpses collection rules
+    match /glimpses/{glimpseId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdminOrFaculty();
+      allow update: if isAdminOrFaculty();
+      allow delete: if isAdmin();
+      
+      // Validate glimpse data
+      allow create: if isAdminOrFaculty() && 
+        request.resource.data.title is string &&
+        request.resource.data.description is string &&
+        request.resource.data.mediaUrl is string;
+    }
+
+    // Community collection rules
+    match /community/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin() || 
+        (isAuthenticated() && resource.data.userId == request.auth.uid);
+      
+      // Validate community post data
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId is string &&
+        request.resource.data.content is string;
     }
   }
 } 

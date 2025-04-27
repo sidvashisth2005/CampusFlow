@@ -33,106 +33,108 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <com.google.android.material.card.MaterialCardView
-                style="@style/AppCard"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Room Booking"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/card_background"
+                android:padding="16dp"
                 android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Select Date"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <DatePicker
+                    android:id="@+id/datePicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:calendarViewShown="false"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Room Type"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
-                    <TextView
-                        style="@style/SubheaderText"
-                        android:layout_width="match_parent"
+                    <Spinner
+                        android:id="@+id/roomTypeSpinner"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Check Room Availability" />
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"/>
 
-                    <TextView
-                        style="@style/BodyText"
-                        android:layout_width="match_parent"
+                    <Spinner
+                        android:id="@+id/capacitySpinner"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Select a date and room to check availability" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_date"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:hint="Date">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_date"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:clickable="true"
-                            android:focusable="false"
-                            android:inputType="none" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_room_type"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:hint="Room Type">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/dropdown_room_type"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <Button
-                        android:id="@+id/btn_check_availability"
-                        style="@style/PrimaryButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:backgroundTint="@color/primary"
-                        android:text="@string/check_availability" />
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"/>
 
                 </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                <Button
+                    android:id="@+id/searchButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Search Available Rooms"
+                    android:backgroundTint="@color/primary"
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="16dp"/>
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"/>
 
             <TextView
-                style="@style/SubheaderText"
+                android:id="@+id/noRoomsText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Available Rooms" />
+                android:text="No rooms available matching your criteria"
+                android:textAlignment="center"
+                android:visibility="gone"
+                android:layout_marginTop="16dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_available_rooms"
+                android:id="@+id/roomsRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_available_room" />
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="16dp"/>
 
-            <TextView
-                style="@style/SubheaderText"
+            <Button
+                android:id="@+id/requestBookingButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Your Bookings" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_your_bookings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="2"
-                tools:listitem="@layout/item_booking" />
+                android:text="Request Booking"
+                android:backgroundTint="@color/primary"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="16dp"
+                android:enabled="false"/>
 
         </LinearLayout>
 

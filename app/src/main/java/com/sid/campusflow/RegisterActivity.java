@@ -14,8 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,16 +27,16 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView tvLoginPrompt;
     
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference usersRef;
+    private FirebaseFirestore firestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Initialize Firebase Auth and Database
+        // Initialize Firebase Auth and Firestore
         firebaseAuth = FirebaseAuth.getInstance();
-        usersRef = FirebaseDatabase.getInstance().getReference("users");
+        firestore = FirebaseFirestore.getInstance();
 
         // Initialize views
         etFullName = findViewById(R.id.et_full_name);
@@ -57,7 +56,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void setupDesignationDropdown() {
-        String[] designations = new String[]{"Student", "Faculty", "Secretary"};
+        String[] designations = new String[]{"Student", "Faculty", "Secretary", "Admin"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, designations);
         dropdownDesignation.setAdapter(adapter);
@@ -111,7 +110,7 @@ public class RegisterActivity extends AppCompatActivity {
             .addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
                     // Registration successful
-                    saveUserDataToDatabase(firebaseAuth.getCurrentUser().getUid(), fullName, email, designation);
+                    saveUserDataToFirestore(firebaseAuth.getCurrentUser().getUid(), fullName, email, designation);
                 } else {
                     // Registration failed
                     Toast.makeText(RegisterActivity.this, "Registration failed: " + task.getException().getMessage(),
@@ -124,14 +123,16 @@ public class RegisterActivity extends AppCompatActivity {
             });
     }
 
-    private void saveUserDataToDatabase(String userId, String fullName, String email, String designation) {
+    private void saveUserDataToFirestore(String userId, String fullName, String email, String designation) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("fullName", fullName);
         userData.put("email", email);
         userData.put("designation", designation);
         userData.put("createdAt", System.currentTimeMillis());
-
-        usersRef.child(userId).setValue(userData)
+        
+        // Save to Firestore users collection
+        firestore.collection("users").document(userId)
+            .set(userData)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     // User data saved successfully

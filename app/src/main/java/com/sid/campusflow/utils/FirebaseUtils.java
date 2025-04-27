@@ -10,6 +10,9 @@ import com.sid.campusflow.models.Event;
 import com.sid.campusflow.models.Notice;
 import com.sid.campusflow.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -28,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 public class FirebaseUtils {
     private static final String TAG = "FirebaseUtils";
@@ -40,6 +44,7 @@ public class FirebaseUtils {
     private static final String ATTENDEES_COLLECTION = "attendees";
     private static final String TIMETABLES_COLLECTION = "timetables";
     private static final String MAPS_COLLECTION = "maps";
+    private static final String ROOMS_COLLECTION = "rooms";
     
     // Storage paths
     private static final String PROFILE_IMAGES_PATH = "profile_images";
@@ -364,5 +369,85 @@ public class FirebaseUtils {
             .document(mapId)
             .delete()
             .addOnCompleteListener(listener);
+    }
+    
+    // Map and room methods
+    
+    /**
+     * Get all rooms
+     */
+    public static void getAllRooms(OnCompleteListener<QuerySnapshot> listener) {
+        db.collection(ROOMS_COLLECTION)
+            .orderBy("name", Query.Direction.ASCENDING)
+            .get()
+            .addOnCompleteListener(listener);
+    }
+    
+    /**
+     * Get rooms by type
+     */
+    public static void getRoomsByType(String roomType, OnCompleteListener<QuerySnapshot> listener) {
+        db.collection(ROOMS_COLLECTION)
+            .whereEqualTo("type", roomType)
+            .orderBy("name", Query.Direction.ASCENDING)
+            .get()
+            .addOnCompleteListener(listener);
+    }
+    
+    /**
+     * Get all room types (unique)
+     */
+    public static void getAllRoomTypes(OnCompleteListener<QuerySnapshot> listener) {
+        db.collection(ROOMS_COLLECTION)
+            .get()
+            .addOnCompleteListener(listener);
+    }
+    
+    /**
+     * Add a room
+     */
+    public static void addRoom(com.sid.campusflow.models.Room room, OnCompleteListener<DocumentReference> listener) {
+        db.collection(ROOMS_COLLECTION)
+            .add(room)
+            .addOnCompleteListener(listener);
+    }
+    
+    /**
+     * Update a room
+     */
+    public static void updateRoom(com.sid.campusflow.models.Room room, OnCompleteListener<Void> listener) {
+        if (room.getId() == null) {
+            return;
+        }
+        db.collection(ROOMS_COLLECTION)
+            .document(room.getId())
+            .set(room)
+            .addOnCompleteListener(listener);
+    }
+    
+    /**
+     * Delete a room
+     */
+    public static void deleteRoom(String roomId, OnCompleteListener<Void> listener) {
+        db.collection(ROOMS_COLLECTION)
+            .document(roomId)
+            .delete()
+            .addOnCompleteListener(listener);
+    }
+    
+    /**
+     * Import rooms from JSON string
+     */
+    public static void importRoomsFromJson(List<com.sid.campusflow.models.Room> rooms, OnCompleteListener<Void> listener) {
+        // Use a batch to add all rooms at once
+        com.google.firebase.firestore.WriteBatch batch = db.batch();
+        
+        for (com.sid.campusflow.models.Room room : rooms) {
+            DocumentReference docRef = db.collection(ROOMS_COLLECTION).document();
+            room.setId(docRef.getId());
+            batch.set(docRef, room);
+        }
+        
+        batch.commit().addOnCompleteListener(listener);
     }
 } 

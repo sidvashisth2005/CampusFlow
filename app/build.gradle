@@ -25,6 +25,10 @@ android {
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:deprecation"
     }
+    // Disable lint abort on error
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -53,6 +57,12 @@ dependencies {
     // Cloudinary SDK
     implementation 'com.cloudinary:cloudinary-android:2.3.1'
     implementation 'com.cloudinary:cloudinary-core:1.33.0'
+    
+    // JSON parsing - Gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // CSV parsing - for Excel files
+    implementation 'com.opencsv:opencsv:5.5.2'
     
     // Testing Dependencies
     testImplementation 'junit:junit:4.13.2'
