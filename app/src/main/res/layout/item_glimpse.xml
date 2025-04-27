@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="100dp"
+    android:layout_height="80dp"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="2dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Image Glimpse View -->
+        <ImageView
+            android:id="@+id/iv_glimpse"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/event_glimpse_description"
+            tools:src="@tools:sample/backgrounds/scenic" />
+
+        <!-- Video Glimpse View - Hidden initially, shown for video items -->
+        <ImageView
+            android:id="@+id/iv_play_indicator"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_play_circle"
+            android:contentDescription="@string/play_video"
+            android:visibility="gone"
+            app:tint="@android:color/white" />
+
+        <!-- Media Type Indicator -->
+        <ImageView
+            android:id="@+id/iv_media_type"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="4dp"
+            android:src="@drawable/ic_image"
+            android:contentDescription="@string/media_type_indicator"
+            android:background="@drawable/circle_background"
+            android:padding="2dp"
+            app:tint="@android:color/white" />
+    </FrameLayout>
+</androidx.cardview.widget.CardView> 

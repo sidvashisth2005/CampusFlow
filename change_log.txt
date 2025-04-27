@@ -1,0 +1,43 @@
+# CampusFlow Change Log
+
+This file documents all significant changes made to the CampusFlow project.
+
+## 2025-04-26 - Initial Project Creation
+
+### Added
+- Project structure with necessary directories
+- Build configuration files (build.gradle)
+- AndroidManifest.xml with activities and permissions
+- Resource files (colors.xml, strings.xml, styles.xml)
+- App logo and navigation icons
+- Authentication screens (Login, Register, Splash)
+- Main activity with bottom navigation
+- Home and Explore fragments
+- Fragment layouts and item layouts
+- Data models (Event, User)
+- Firebase integration (Authentication, Database, Cloud Messaging)
+
+## 2025-04-26 - Implementing Remaining Components
+
+### Added
+- BookingFragment implementation
+- CommunityFragment implementation
+- ProfileFragment implementation
+- EventsAdapter for RecyclerView
+- EventHighlightsAdapter for RecyclerView
+- Event details and creation workflow
+- Booking system implementation
+- Notification handling improvements
+- Repository classes for data management
+- Additional error handling and UX improvements
+
+## 2025-04-27 - Implementation of Approval System
+
+### Added
+- Approval model class for managing approval requests
+- ApprovalAdapter for displaying approval items in RecyclerView
+- ProfileFragment with approval management functionality
+- DateUtils helper class for date formatting
+- Layout files for approval items and fragments
+- Status indicators for approval states (pending, approved, rejected)
+- String resources for approval-related UI elements 

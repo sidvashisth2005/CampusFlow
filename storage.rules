@@ -1,0 +1,63 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isUserOwned(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.designation == "admin";
+    }
+    
+    // Profile images
+    match /profile_images/{userId}/{fileName} {
+      // Anyone can view profile images
+      allow read: if true;
+      // Only the owner can upload their profile image
+      allow write: if isAuthenticated() && isUserOwned(userId);
+    }
+    
+    // Event images
+    match /event_images/{eventId}/{fileName} {
+      // Anyone can view event images
+      allow read: if true;
+      // Only authenticated users can upload event images
+      allow create: if isAuthenticated();
+      // Only the event organizer or admin can update/delete images
+      allow update, delete: if isAuthenticated() && 
+        (
+          firestore.get(/databases/(default)/documents/events/$(eventId)).data.organizerId == request.auth.uid ||
+          isAdmin()
+        );
+    }
+    
+    // Department documents
+    match /department_docs/{departmentId}/{fileName} {
+      // Only members of the department can view documents
+      allow read: if isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.department == departmentId;
+      // Only admins can upload department documents
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // Approval attachments
+    match /approval_docs/{approvalId}/{fileName} {
+      // The requester and admins can view approval documents
+      allow read: if isAuthenticated() && 
+        (
+          firestore.get(/databases/(default)/documents/approvals/$(approvalId)).data.userId == request.auth.uid ||
+          isAdmin()
+        );
+      // Only the requester can upload attachments
+      allow create: if isAuthenticated() && 
+        firestore.get(/databases/(default)/documents/approvals/$(approvalId)).data.userId == request.auth.uid;
+      // Only admins can delete attachments
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+  }
+} 

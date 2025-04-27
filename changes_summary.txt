@@ -1,0 +1,48 @@
+# CampusFlow Project Changes Summary
+
+This file documents all significant changes made to the CampusFlow application during development, organized by date and feature area.
+
+## 2023-08-03: Event Display and Registration System
+
+### Files Created
+- `app/src/main/res/layout/activity_event_detail.xml`: Detailed event view layout with registration options
+- `app/src/main/java/com/example/campusflow/EventDetailActivity.java`: Activity to display event details and handle registration
+- `app/src/main/java/com/example/campusflow/adapters/EventHighlightAdapter.java`: Adapter for event highlights section
+- `app/src/main/res/drawable/bg_status_chip.xml`: Background drawable for status indicators
+
+### Files Modified
+- `app/src/main/java/com/example/campusflow/fragments/HomeFragment.java`: Implemented event loading from Firebase
+- `app/src/main/res/layout/fragment_home.xml`: Added progress bar for loading state
+- `app/src/main/java/com/example/campusflow/models/Event.java`: Added featured flag and created timestamp
+- `app/src/main/AndroidManifest.xml`: Updated package name and corrected activity names
+- `app/src/main/res/values/strings.xml`: Added new string resources for event details
+- `progress_log.txt`: Updated with latest progress
+
+### Key Features Implemented
+- Event detail view with collapsing toolbar and image header
+- Event registration and unregistration with Firebase integration
+- Real-time attendance counts and event capacity management
+- Status indicators for registration and approval requirements
+- Event sharing functionality
+- Loading of upcoming events and featured/recent events with proper adapters
+- Fallback handling when no featured events exist
+
+## 2023-08-02: Data Models and Firebase Messaging
+
+### Files Created
+- `app/src/main/java/com/example/campusflow/models/Event.java`: Event data model
+- `app/src/main/java/com/example/campusflow/models/User.java`: User data model
+- `app/src/main/java/com/example/campusflow/MyFirebaseMessagingService.java`: Service for push notifications
+
+### Key Features Implemented
+- Firebase Cloud Messaging integration
+- Push notification handling for events, bookings, and permissions
+- Data models for core application entities
+
+## 2023-08-01: Initial Project Setup
+
+### Key Features Implemented
+- Project directory structure creation
+- Firebase authentication integration
+- Initial UI components setup
+- Authentication flow implementation (login, registration, splash screen) 
